@@ -1,0 +1,7 @@
+CREATE TABLE projects (
+    id BIGSERIAL PRIMARY KEY,
+    name VARCHAR(80) NOT NULL,
+    description VARCHAR(500),
+    created_at TIMESTAMP WITH TIME ZONE NOT NULL,
+    updated_at TIMESTAMP WITH TIME ZONE NOT NULL
+);

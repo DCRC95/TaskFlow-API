@@ -1,0 +1,27 @@
+spring:
+  application:
+    name: taskflow
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/taskflow
+    username: taskflow
+    password: taskflow
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: true
+
+  flyway:
+    enabled: true
+
+  scheduling:
+    overdue-task-job:
+      fixed-delay: PT5M
+
+security:
+  jwt:
+    secret: "THIS_IS_A_DEMO_SECRET_CHANGE_ME_64_CHARS_MINIMUM_1234567890"
+    expiry-minutes: 60
+
+
