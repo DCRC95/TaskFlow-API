@@ -1,5 +1,4 @@
-![CI](https://github.com/OWNER/REPO/actions/workflows/ci.yml/badge.svg)
-
+[![CI](https://github.com/DCRC95/TaskFlow-API/actions/workflows/ci.yml/badge.svg)](https://github.com/DCRC95/TaskFlow-API/actions/workflows/ci.yml)
 # TaskFlow API
 
 A production-style **multi-user task and project management REST API** built with **Java 21, Spring Boot 3, PostgreSQL, JWT authentication, Flyway migrations, and Testcontainers**.
