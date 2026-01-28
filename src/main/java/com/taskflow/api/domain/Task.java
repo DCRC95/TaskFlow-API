@@ -1,8 +1,20 @@
 package com.taskflow.api.domain;
 
-import jakarta.persistence.*;
 import java.time.Instant;
 import java.time.LocalDate;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.Version;
 
 @Entity
 @Table(name = "tasks")
@@ -33,6 +45,10 @@ public class Task {
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
 
+    @Version
+    @Column(name = "version", nullable = false)
+    private Long version;
+
     protected Task() {
         // required by JPA
     }
@@ -53,6 +69,7 @@ public class Task {
     public LocalDate getDueDate() { return dueDate; }
     public Instant getCreatedAt() { return createdAt; }
     public Instant getUpdatedAt() { return updatedAt; }
+    public Long getVersion() { return version; }
 
     public void setTitle(String title) { this.title = title; }
     public void setStatus(TaskStatus status) { this.status = status; }

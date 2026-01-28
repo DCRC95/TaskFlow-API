@@ -1,14 +1,20 @@
 package com.taskflow.api.service;
 
-import com.taskflow.api.domain.*;
-import com.taskflow.api.dto.*;
-import com.taskflow.api.repository.UserRepository;
-import com.taskflow.api.security.JwtService;
-import org.springframework.security.authentication.*;
+import java.time.Instant;
+
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.time.Instant;
+import com.taskflow.api.domain.User;
+import com.taskflow.api.domain.UserRole;
+import com.taskflow.api.dto.AuthResponse;
+import com.taskflow.api.dto.LoginRequest;
+import com.taskflow.api.dto.RegisterRequest;
+import com.taskflow.api.exception.BadRequestException;
+import com.taskflow.api.repository.UserRepository;
+import com.taskflow.api.security.JwtService;
 
 @Service
 public class AuthService {
@@ -27,7 +33,7 @@ public class AuthService {
 
     public AuthResponse register(RegisterRequest req) {
         if (users.existsByEmail(req.email())) {
-            throw new IllegalArgumentException("Email already in use");
+            throw new BadRequestException("Email already in use");
         }
 
         String hash = encoder.encode(req.password());

@@ -1,8 +1,9 @@
+![CI](https://github.com/OWNER/REPO/actions/workflows/ci.yml/badge.svg)
+
 # TaskFlow API
 
 A production-style **multi-user task and project management REST API** built with **Java 21, Spring Boot 3, PostgreSQL, JWT authentication, Flyway migrations, and Testcontainers**.
 
-This project was designed as a **portfolio-quality backend service**, demonstrating clean architecture, security best practices, database migrations, background jobs, and integration testing with real infrastructure.
 
 ---
 
@@ -85,6 +86,19 @@ This design ensures:
 * Business logic is independent of HTTP and persistence
 * Authorisation rules are enforced centrally
 * Database access can be changed with minimal impact
+
+### Security Flow
+
+* Incoming requests pass through a JWT authentication filter
+* On valid tokens, the user’s email is stored in the `SecurityContext`
+* Services use `CurrentUser` to resolve the email and enforce ownership in repository queries
+* Controllers remain thin and delegate auth-sensitive logic to services
+
+### Persistence and Migrations
+
+* PostgreSQL is the primary data store
+* Hibernate (Spring Data JPA) maps domain entities to tables
+* Flyway manages versioned schema evolution and keeps test and dev databases in sync
 
 ---
 
@@ -199,6 +213,18 @@ This ensures:
 
 ---
 
+## Design Trade-offs
+
+* **Flyway for schema evolution**: Chosen over automatic `ddl-auto` updates to keep production, test, and local schemas reproducible and reviewable.
+* **Ownership checks in repository methods**: Enforcing `ownerEmail` directly in repository queries avoids leaking existence of other users’ data and keeps controllers simple.
+* **`Instant` over `LocalDateTime` for timestamps**: All timestamps (`createdAt`, `updatedAt`) are stored as `Instant` to make time zone behaviour explicit and reliable across environments.
+* **Filtering via dedicated repository methods**: Separate finder methods (status, dueBefore, both) are intentionally simple to read and optimise, rather than introducing a more complex specification/predicate DSL.
+* **Scheduled overdue job instead of on-read calculation**: A periodic job updates overdue tasks once, keeping read paths lean and making overdue status available for querying and indexing.
+* **Optimistic locking with `@Version`**: Version columns on entities protect against lost updates with minimal API changes, returning HTTP 409 conflicts on concurrent modifications.
+* **Global error envelope**: A single `ApiError` format for all exceptions makes client-side error handling easier and ensures consistent logging and HTTP status mapping.
+
+---
+
 ## Running the Application
 
 ### Prerequisites
@@ -212,6 +238,20 @@ This ensures:
 ```bash
 ./mvnw spring-boot:run
 ```
+
+### Local Development
+
+From the project root:
+
+```bash
+# Run tests (requires Docker for Testcontainers)
+./mvnw test
+
+# Start the application (PostgreSQL must be available locally)
+./mvnw spring-boot:run
+```
+
+If you prefer Docker Compose for local infra, start a PostgreSQL container first (for example using `docker-compose.yml` in this repo, if present), then run the app as above.
 
 ---
 
@@ -239,6 +279,44 @@ curl -X POST http://localhost:8080/api/v1/projects \
 ```bash
 curl -X GET http://localhost:8080/api/v1/projects \
   -H "Authorization: Bearer <JWT>"
+```
+
+### Create a task in a project
+
+```bash
+curl -X POST http://localhost:8080/api/v1/projects/{projectId}/tasks \
+  -H "Authorization: Bearer <JWT>" \
+  -H "Content-Type: application/json" \
+  -d '{"title":"My Task","dueDate":"2025-01-31"}'
+```
+
+### Filter tasks by status and due date
+
+```bash
+curl -X GET "http://localhost:8080/api/v1/projects/{projectId}/tasks?status=OPEN&dueBefore=2025-01-31" \
+  -H "Authorization: Bearer <JWT>"
+```
+
+### Analytics: productivity summary for current user
+
+```bash
+curl -X GET "http://localhost:8080/api/v1/analytics/summary?from=2025-01-01&to=2025-01-31" \
+  -H "Authorization: Bearer <JWT>"
+```
+
+Example response:
+
+```json
+{
+  "tasksCreated": 10,
+  "tasksCompleted": 7,
+  "tasksOverdue": 1,
+  "completionRate": 0.7,
+  "topProjectsByOpenTasks": [
+    { "projectId": 1, "projectName": "Backend", "openTasks": 3 },
+    { "projectId": 2, "projectName": "Frontend", "openTasks": 2 }
+  ]
+}
 ```
 
 ---

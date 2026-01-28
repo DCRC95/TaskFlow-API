@@ -15,6 +15,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import jakarta.persistence.Version;
 
 
 @Entity
@@ -44,6 +45,10 @@ public class Project {
     @JoinColumn(name = "owner_id", nullable = false)
     private User owner;
 
+    @Version
+    @Column(name = "version", nullable = false)
+    private Long version;
+
     protected Project() {
         // required by JPA
     }
@@ -62,6 +67,7 @@ public class Project {
     public Instant getCreatedAt() { return createdAt; }
     public Instant getUpdatedAt() { return updatedAt; }
     public User getOwner() { return owner; }
+    public Long getVersion() { return version; }
 
     public void setName(String name) { this.name = name; }
     public void setDescription(String description) { this.description = description; }

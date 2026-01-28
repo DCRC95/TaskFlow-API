@@ -10,6 +10,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.persistence.Version;
 
 @Entity
 @Table(name = "users")
@@ -30,6 +31,10 @@ public class User {
     @Column(name = "created_at", nullable = false)
     private Instant createdAt;
 
+    @Version
+    @Column(name = "version", nullable = false)
+    private Long version;
+
     protected User() {}
 
     public User(String email, String passwordHash, UserRole role, Instant createdAt) {
@@ -44,4 +49,5 @@ public class User {
     public String getPasswordHash() { return passwordHash; }
     public UserRole getRole() { return role; }
     public Instant getCreatedAt() { return createdAt; }
+    public Long getVersion() { return version; }
 }
